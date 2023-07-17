@@ -16,17 +16,7 @@ def draw_menu(todo_list_name):
 
 
 def get_user_choice():
-    options = ["1", "2", "3", "4", "5"]
     choice = input("Enter your choice (1-5): ")
-
-    while choice not in options:
-        matching_options = [option for option in options if option.startswith(choice)]
-
-        if matching_options:
-            print("Matching options:")
-            print("\n".join(matching_options))
-
-        choice = input("Enter your choice (1-5): ")
 
     return choice
 
