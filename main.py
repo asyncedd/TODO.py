@@ -1,7 +1,13 @@
 import os
 import platform
 
-TODO_LIST_FILENAME = "todo.txt"
+TODO_LISTS_DIRECTORY = "todo_lists"
+
+MENU_ADD_TASK = "1"
+MENU_REMOVE_TASK = "2"
+MENU_DISPLAY_TASKS = "3"
+MENU_RENAME_TODO_LIST = "4"
+MENU_EXIT = "5"
 
 
 def clear_screen():
@@ -25,25 +31,27 @@ def get_user_choice():
     return input("Enter your choice (1-5): ")
 
 
-def add_task(todo_list):
-    clear_screen()
+def add_task(todo_lists, todo_list_name):
     task = input("Enter task: ")
-    todo_list.append(task)
+    todo_list = todo_lists.get(todo_list_name, set())
+    todo_list.add(task)
+    todo_lists[todo_list_name] = todo_list
     print(f"Task added: {task}")
 
 
-def remove_task(todo_list):
-    clear_screen()
+def remove_task(todo_lists, todo_list_name):
     task = input("Enter task: ")
+    todo_list = todo_lists.get(todo_list_name, set())
     if task in todo_list:
         todo_list.remove(task)
         print(f"Task removed: {task}")
     else:
         print(f"Task not found: {task}")
+    todo_lists[todo_list_name] = todo_list
 
 
-def display_tasks(todo_list):
-    clear_screen()
+def display_tasks(todo_lists, todo_list_name):
+    todo_list = todo_lists.get(todo_list_name, set())
     if todo_list:
         print("Tasks:")
         for task in todo_list:
@@ -53,42 +61,49 @@ def display_tasks(todo_list):
 
 
 def rename_todo_list():
-    clear_screen()
     return input("Enter the new name for the TODO list: ")
 
 
-def save_tasks(todo_list):
-    with open(TODO_LIST_FILENAME, "w") as file:
+def save_tasks(todo_lists, todo_list_name):
+    if not os.path.exists(TODO_LISTS_DIRECTORY):
+        os.makedirs(TODO_LISTS_DIRECTORY)
+
+    todo_list = todo_lists.get(todo_list_name, set())
+    filename = os.path.join(TODO_LISTS_DIRECTORY, f"{todo_list_name}.txt")
+    with open(filename, "w") as file:
         file.write("\n".join(todo_list))
 
 
-def load_tasks():
-    if not os.path.exists(TODO_LIST_FILENAME):
-        return []
+def load_tasks(todo_list_name):
+    filename = os.path.join(TODO_LISTS_DIRECTORY, f"{todo_list_name}.txt")
+    if not os.path.exists(filename):
+        return set()
 
-    with open(TODO_LIST_FILENAME, "r") as file:
-        return file.read().splitlines()
+    with open(filename, "r") as file:
+        return set(file.read().splitlines())
 
 
 def main():
+    todo_lists = {}
     todo_list_name = input("Enter the name for your TODO list: ")
-    todo_list = load_tasks()
-
-    menu_choices = {
-        "1": add_task,
-        "2": remove_task,
-        "3": display_tasks,
-        "4": rename_todo_list,
-    }
+    todo_lists[todo_list_name] = load_tasks(todo_list_name)
 
     while True:
         draw_menu(todo_list_name)
         choice = get_user_choice()
 
-        if choice in menu_choices:
-            menu_choices[choice](todo_list)
-        elif choice == "5":
-            lambda _: save_tasks(todo_list)
+        if choice == MENU_ADD_TASK:
+            add_task(todo_lists, todo_list_name)
+        elif choice == MENU_REMOVE_TASK:
+            remove_task(todo_lists, todo_list_name)
+        elif choice == MENU_DISPLAY_TASKS:
+            display_tasks(todo_lists, todo_list_name)
+        elif choice == MENU_RENAME_TODO_LIST:
+            new_name = rename_todo_list()
+            todo_lists[new_name] = todo_lists.pop(todo_list_name, set())
+            todo_list_name = new_name
+        elif choice == MENU_EXIT:
+            save_tasks(todo_lists, todo_list_name)
             print("Exiting...")
             break
         else:
