@@ -1,8 +1,14 @@
 import os
+import platform
+
+TODO_LIST_FILENAME = "todo.txt"
 
 
 def clear_screen():
-    os.system("cls" if os.name == "nt" else "clear")
+    if platform.system() == "Windows":
+        os.system("cls")
+    else:
+        print("\033c", end="")
 
 
 def draw_menu(todo_list_name):
@@ -24,7 +30,6 @@ def add_task(todo_list):
     task = input("Enter task: ")
     todo_list.append(task)
     print(f"Task added: {task}")
-    input("Press Enter to continue...")
 
 
 def remove_task(todo_list):
@@ -35,7 +40,6 @@ def remove_task(todo_list):
         print(f"Task removed: {task}")
     else:
         print(f"Task not found: {task}")
-    input("Press Enter to continue...")
 
 
 def display_tasks(todo_list):
@@ -46,7 +50,6 @@ def display_tasks(todo_list):
             print(f"- {task}")
     else:
         print("No tasks found.")
-    input("Press Enter to continue...")
 
 
 def rename_todo_list():
@@ -54,42 +57,44 @@ def rename_todo_list():
     return input("Enter the new name for the TODO list: ")
 
 
-def save_tasks(todo_list, filename):
-    with open(filename, "w") as file:
+def save_tasks(todo_list):
+    with open(TODO_LIST_FILENAME, "w") as file:
         file.write("\n".join(todo_list))
 
 
-def load_tasks(filename):
-    if not os.path.exists(filename):
+def load_tasks():
+    if not os.path.exists(TODO_LIST_FILENAME):
         return []
 
-    with open(filename, "r") as file:
+    with open(TODO_LIST_FILENAME, "r") as file:
         return file.read().splitlines()
 
 
 def main():
     todo_list_name = input("Enter the name for your TODO list: ")
-    todo_list = load_tasks("todo.txt")
+    todo_list = load_tasks()
+
+    menu_choices = {
+        "1": add_task,
+        "2": remove_task,
+        "3": display_tasks,
+        "4": rename_todo_list,
+    }
 
     while True:
         draw_menu(todo_list_name)
         choice = get_user_choice()
 
-        if choice == "1":
-            add_task(todo_list)
-        elif choice == "2":
-            remove_task(todo_list)
-        elif choice == "3":
-            display_tasks(todo_list)
-        elif choice == "4":
-            todo_list_name = rename_todo_list()
+        if choice in menu_choices:
+            menu_choices[choice](todo_list)
         elif choice == "5":
-            save_tasks(todo_list, "todo.txt")
+            lambda _: save_tasks(todo_list)
             print("Exiting...")
             break
         else:
             print("Invalid choice. Please try again.")
-            input("Press Enter to continue...")
+
+        input("Press Enter to continue...")
 
 
 if __name__ == "__main__":
