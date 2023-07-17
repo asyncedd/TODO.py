@@ -16,9 +16,7 @@ def draw_menu(todo_list_name):
 
 
 def get_user_choice():
-    choice = input("Enter your choice (1-5): ")
-
-    return choice
+    return input("Enter your choice (1-5): ")
 
 
 def add_task(todo_list):
@@ -53,8 +51,7 @@ def display_tasks(todo_list):
 
 def rename_todo_list():
     clear_screen()
-    new_name = input("Enter the new name for the TODO list: ")
-    return new_name
+    return input("Enter the new name for the TODO list: ")
 
 
 def save_tasks(todo_list, filename):
